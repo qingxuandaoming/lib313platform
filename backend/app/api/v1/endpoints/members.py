@@ -1,21 +1,41 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy import func
+from typing import List, Optional
 from app.core.database import get_db
-from app.models.member import Member
-from app.schemas.member import MemberCreate, MemberUpdate, MemberResponse, MemberListResponse
+from app.models.member import Member, MemberRole
+from app.schemas.member import MemberCreate, MemberUpdate, MemberResponse, MemberListResponse, MemberStats
 
 router = APIRouter()
 
 
 @router.get("", response_model=MemberListResponse)
 def get_members(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    search: Optional[str] = Query(None),
+    role: Optional[MemberRole] = Query(None),
+    grade: Optional[int] = Query(None),
     db: Session = Depends(get_db)
 ):
     """获取成员列表（标准化返回：{ data, total }）"""
     query = db.query(Member)
+
+    # 筛选条件
+    if role:
+        query = query.filter(Member.role == role)
+    if grade:
+        query = query.filter(Member.grade == grade)
+    if search:
+        query = query.filter(
+            Member.name.contains(search) |
+            Member.major.contains(search) |
+            Member.student_id.contains(search)
+        )
+
+    # 按创建时间倒序
+    query = query.order_by(Member.created_at.desc())
+
     total = query.count()
     members = query.offset(skip).limit(limit).all()
     return {"data": members, "total": total}
@@ -31,6 +51,28 @@ def get_member(member_id: int, db: Session = Depends(get_db)):
             detail="成员不存在"
         )
     return member
+
+
+@router.get("/stats", response_model=MemberStats)
+def get_member_stats(db: Session = Depends(get_db)):
+    """获取成员统计信息"""
+    total_members = db.query(Member).count()
+
+    # 按角色统计
+    role_stats = {}
+    for role in MemberRole:
+        count = db.query(Member).filter(Member.role == role).count()
+        role_stats[role.value] = count
+
+    # 按年级统计
+    grade_counts = db.query(Member.grade, func.count(Member.id)).group_by(Member.grade).all()
+    grade_stats = {grade: count for grade, count in grade_counts}
+
+    return {
+        "total_members": total_members,
+        "role_stats": role_stats,
+        "grade_stats": grade_stats,
+    }
 
 
 @router.post("", response_model=MemberResponse, status_code=status.HTTP_201_CREATED)

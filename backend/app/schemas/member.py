@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime
 from app.models.member import MemberRole
 
@@ -46,3 +46,9 @@ class MemberResponse(MemberBase):
 class MemberListResponse(BaseModel):
     data: List[MemberResponse]
     total: int
+
+
+class MemberStats(BaseModel):
+    total_members: int
+    role_stats: Dict[str, int]
+    grade_stats: Dict[int, int]
