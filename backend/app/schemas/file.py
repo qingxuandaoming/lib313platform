@@ -51,10 +51,15 @@ class FileStats(BaseModel):
 
 class BatchUploadResponse(BaseModel):
     uploaded_files: List[FileResponse]
-    failed_files: Optional[List[dict]] = None
+    failed_files: Optional[List["FailedFileItem"]] = None
     message: Optional[str] = None
 
 
 class FileListResponse(BaseModel):
     data: List[FileResponse]
     total: int
+
+
+class FailedFileItem(BaseModel):
+    filename: str
+    error: str

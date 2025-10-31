@@ -53,12 +53,12 @@ cp .env.example .env    # Linux/Mac
 
 编辑 `.env` 文件，配置数据库连接：
 
-编辑 `.env` 文件，配置数据库连接：
-
 ```ini
-
 DATABASE_URL=postgresql://lab313user:yourpassword@localhost:5432/lab313_platform
 SECRET_KEY=your-secret-key-here-change-in-production
+# 可选：默认管理员账号（未配置则使用 admin/admin123）
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
 ```
 
 ### 5. 启动后端服务
@@ -142,12 +142,30 @@ npm run dev
 - `GET /api/v1/files` - 获取文件列表
 - `POST /api/v1/files/upload` - 上传文件
 - `DELETE /api/v1/files/{id}` - 删除文件
+- `GET /api/v1/files/{id}` - 获取文件详情
+- `GET /api/v1/files/{id}/download` - 下载文件
+- `PUT /api/v1/files/{id}` - 更新文件信息
+- `POST /api/v1/files/batch-upload` - 批量上传文件（最多10个）
+- `GET /api/v1/files/stats` - 获取文件统计（总数、总大小、按类型统计）
 
 ### 首页统计
 
-- `GET /api/v1/stats` - 获取首页统计（项目数、成员数、会话数、设备数）
+- `GET /api/v1/stats` - 获取首页统计（成员数、项目数、分享会数、设备数、文件数）
 
-> 列表接口统一返回结构：`{ data: [...], total: N }`
+### 认证
+
+- `POST /api/v1/auth/login` - 管理员登录，返回访问令牌
+  - 请求体示例：`{ "username": "admin", "password": "admin123" }`
+- `GET /api/v1/auth/me` - 使用 Bearer Token 获取当前用户信息
+  - 请求头：`Authorization: Bearer <access_token>`
+
+> 提示：首次登录会自动创建或重置默认管理员（用户名/密码取自 `.env` 或默认 `admin/admin123`）。
+
+> 返回结构说明：
+> - 所有列表（成员、项目、分享会、设备、值日、文件）：统一返回 `{ data: [...], total: N }`
+> - 批量上传 `POST /api/v1/files/batch-upload`：返回 `BatchUploadResponse`，包含 `uploaded_files`、`failed_files`（可为空）和 `message`
+
+> 前端令牌使用：在 `frontend/src/utils/request.js` 的请求拦截器中为需要认证的请求添加 `Authorization: Bearer <token>`。
 
 ## 六、常见问题
 

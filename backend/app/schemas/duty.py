@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import date
 
 
@@ -28,3 +28,8 @@ class DutyScheduleResponse(DutyScheduleBase):
 
     class Config:
         from_attributes = True
+
+
+class DutyScheduleListResponse(BaseModel):
+    data: List[DutyScheduleResponse]
+    total: int

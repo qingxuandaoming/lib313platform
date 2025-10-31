@@ -4,12 +4,17 @@ from typing import List
 from datetime import date
 from app.core.database import get_db
 from app.models.duty import DutySchedule
-from app.schemas.duty import DutyScheduleCreate, DutyScheduleUpdate, DutyScheduleResponse
+from app.schemas.duty import (
+    DutyScheduleCreate,
+    DutyScheduleUpdate,
+    DutyScheduleResponse,
+    DutyScheduleListResponse,
+)
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[DutyScheduleResponse])
+@router.get("", response_model=DutyScheduleListResponse)
 def get_duty_schedules(
     skip: int = 0,
     limit: int = 100,
@@ -17,15 +22,16 @@ def get_duty_schedules(
     end_date: date = None,
     db: Session = Depends(get_db)
 ):
-    """获取值日安排列表"""
+    """获取值日安排列表（标准化返回：{ data, total }）"""
     query = db.query(DutySchedule)
     if start_date:
         query = query.filter(DutySchedule.duty_date >= start_date)
     if end_date:
         query = query.filter(DutySchedule.duty_date <= end_date)
 
+    total = query.count()
     schedules = query.order_by(DutySchedule.duty_date).offset(skip).limit(limit).all()
-    return schedules
+    return {"data": schedules, "total": total}
 
 
 @router.get("/{schedule_id}", response_model=DutyScheduleResponse)

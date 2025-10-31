@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import Member, Project, Session as SessionModel, Device, File
+from app.models.member import Member
+from app.models.project import Project
+from app.models.session import Session as SessionModel
+from app.models.device import Device
+from app.models.file import File
 
 
 router = APIRouter()
@@ -10,16 +14,11 @@ router = APIRouter()
 
 @router.get("")
 def get_stats(db: Session = Depends(get_db)):
-    members_count = db.query(Member).count()
-    projects_count = db.query(Project).count()
-    sessions_count = db.query(SessionModel).count()
-    devices_count = db.query(Device).count()
-    files_count = db.query(File).count()
-
+    """返回系统数据统计"""
     return {
-        "members": members_count,
-        "projects": projects_count,
-        "sessions": sessions_count,
-        "devices": devices_count,
-        "files": files_count,
+        "members": db.query(Member).count(),
+        "projects": db.query(Project).count(),
+        "sessions": db.query(SessionModel).count(),
+        "devices": db.query(Device).count(),
+        "files": db.query(File).count(),
     }

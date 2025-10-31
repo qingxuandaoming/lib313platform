@@ -10,7 +10,13 @@ from pathlib import Path
 from app.core.database import get_db
 from app.core.config import get_settings
 from app.models.file import File as FileModel, FileType
-from app.schemas.file import FileCreate, FileResponse as FileResponseSchema, FileUpdate, FileListResponse
+from app.schemas.file import (
+    FileCreate,
+    FileResponse as FileResponseSchema,
+    FileUpdate,
+    FileListResponse,
+    BatchUploadResponse,
+)
 
 router = APIRouter()
 settings = get_settings()
@@ -272,7 +278,7 @@ def delete_file(file_id: int, db: Session = Depends(get_db)):
     return None
 
 
-@router.post("/batch-upload", response_model=List[FileResponseSchema])
+@router.post("/batch-upload", response_model=BatchUploadResponse)
 async def batch_upload_files(
     files: List[UploadFile] = File(...),
     uploader_id: int = 1,  # TODO: 从认证中获取
@@ -344,12 +350,13 @@ async def batch_upload_files(
                 "error": str(e)
             })
     
-    if failed_files:
-        # 如果有失败的文件，返回部分成功的结果
-        return {
-            "uploaded_files": uploaded_files,
-            "failed_files": failed_files,
-            "message": f"成功上传 {len(uploaded_files)} 个文件，{len(failed_files)} 个文件上传失败"
-        }
-    
-    return uploaded_files
+    # 统一返回结构
+    return {
+        "uploaded_files": uploaded_files,
+        "failed_files": failed_files or None,
+        "message": (
+            f"成功上传 {len(uploaded_files)} 个文件，{len(failed_files)} 个文件上传失败"
+            if failed_files
+            else f"成功上传 {len(uploaded_files)} 个文件"
+        ),
+    }
