@@ -3,6 +3,7 @@
 ## 一、环境准备
 
 ### 1. 安装依赖软件
+
 - Python 3.8+
 - Node.js 16+
 - PostgreSQL 12+
@@ -42,14 +43,20 @@ pip install -r requirements.txt
 ```
 
 ### 4. 配置环境变量
+
 复制 `.env.example` 为 `.env`：
+
 ```bash
 copy .env.example .env  # Windows
 cp .env.example .env    # Linux/Mac
 ```
 
 编辑 `.env` 文件，配置数据库连接：
+
+编辑 `.env` 文件，配置数据库连接：
+
 ```ini
+
 DATABASE_URL=postgresql://lab313user:yourpassword@localhost:5432/lab313_platform
 SECRET_KEY=your-secret-key-here-change-in-production
 ```
@@ -60,38 +67,42 @@ SECRET_KEY=your-secret-key-here-change-in-production
 python main.py
 ```
 
-后端服务将运行在 http://localhost:8000
+后端服务将运行在 <http://localhost:8000>
 
-访问 http://localhost:8000/docs 查看API文档
+访问 [http://localhost:8000/docs](http://localhost:8000/docs) 查看API文档
 
 ## 三、前端配置
 
 ### 1. 进入前端目录
+
 ```bash
 cd frontend
 ```
 
 ### 2. 安装依赖
+
 ```bash
 npm install
 ```
 
 ### 3. 启动开发服务器
+
 ```bash
 npm run dev
 ```
 
-前端服务将运行在 http://localhost:5173
+前端服务将运行在 <http://localhost:5173>
 
 ## 四、验证安装
 
-1. 打开浏览器访问 http://localhost:5173
+1. 打开浏览器访问 <http://localhost:5173>
 2. 应该能看到"313实验室开放平台"首页
 3. 点击"成员管理"，可以添加、编辑、删除成员
 
 ## 五、API端点说明
 
 ### 成员管理
+
 - `GET /api/v1/members` - 获取成员列表
 - `POST /api/v1/members` - 创建成员
 - `GET /api/v1/members/{id}` - 获取成员详情
@@ -149,6 +160,7 @@ npm run dev
 ### 2. 端口被占用
 
 后端默认端口8000，前端默认端口5173，如果被占用可以修改：
+
 - 后端：修改 `main.py` 中的 `port` 参数
 - 前端：修改 `vite.config.js` 中的 `server.port`
 
@@ -176,10 +188,12 @@ npm run build
 ## 八、下一步开发
 
 当前已完成：
+
 - ✅ 后端API接口（6个模块）
 - ✅ 前端成员管理页面
 
 待开发功能：
+
 - [ ] 项目展示页面
 - [ ] 分享会页面
 - [ ] 设备管理页面
@@ -191,5 +205,6 @@ npm run build
 ## 九、技术支持
 
 如有问题，请联系实验室管理员或查看：
-- API文档：http://localhost:8000/docs
+
+- API文档：<http://localhost:8000/docs>
 - 项目README：../README.md

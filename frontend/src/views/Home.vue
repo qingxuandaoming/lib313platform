@@ -9,7 +9,7 @@
     </div>
 
     <!-- 统计卡片 -->
-    <div class="stats-section">
+    <div class="stats-section" v-loading="loading.stats">
       <el-row :gutter="20">
         <el-col :span="6">
           <el-card class="stat-card">
@@ -67,6 +67,7 @@
           </el-card>
         </el-col>
       </el-row>
+      <el-alert v-if="error.stats" :title="error.stats" type="error" show-icon class="mt-10" />
     </div>
 
     <!-- 快速操作 -->
@@ -183,8 +184,14 @@ const stats = ref({
 })
 
 const loading = ref({
+  stats: false,
   members: false,
   projects: false
+})
+const error = ref({
+  stats: '',
+  members: '',
+  projects: ''
 })
 
 const recentProjects = ref([])
@@ -192,6 +199,8 @@ const recentMembers = ref([])
 
 // 获取统计数据
 const fetchStats = async () => {
+  loading.value.stats = true
+  error.value.stats = ''
   try {
     const response = await getStats()
     stats.value = {
@@ -200,8 +209,11 @@ const fetchStats = async () => {
       sessions: response?.sessions ?? 0,
       devices: response?.devices ?? 0
     }
-  } catch (error) {
-    console.error('获取统计数据失败:', error)
+  } catch (err) {
+    console.error('获取统计数据失败:', err)
+    error.value.stats = '获取统计数据失败'
+  } finally {
+    loading.value.stats = false
   }
 }
 

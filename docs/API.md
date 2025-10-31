@@ -43,8 +43,6 @@
 
 #### 1.1 获取成员列表
 
-#### 1.1 获取成员列表
-
 - **URL**: `GET /members`
 - **参数**:
   - `skip` (int, optional): 跳过的记录数，默认0
@@ -64,7 +62,9 @@
   - `grade` (int, optional): 年级筛选
 
 **响应示例**:
+
 ```json
+
 {
   "data": [
     {
@@ -89,13 +89,15 @@
 #### 1.2 获取单个成员
 
 - **URL**: `GET /members/{member_id}`
-- **参数**: 
+- **参数**:
+  
   - `member_id` (int): 成员ID
 
 #### 1.3 创建成员
 
 - **URL**: `POST /members`
 - **请求体**:
+  
 ```json
 
 {
@@ -112,6 +114,7 @@
 ```
 
 #### 1.4 更新成员
+
 - **URL**: `PUT /members/{member_id}`
 - **请求体**: 同创建成员，所有字段可选
 
@@ -168,11 +171,15 @@
 ```
 
 #### 2.2 获取单个项目
+
 - **URL**: `GET /projects/{project_id}`
 
 #### 2.3 创建项目
+
 - **URL**: `POST /projects`
+
 - **请求体**:
+  
 ```json
 {
   "name": "智能聊天机器人",
@@ -189,14 +196,18 @@
 ```
 
 #### 2.4 更新项目
+
 - **URL**: `PUT /projects/{project_id}`
 
 #### 2.5 删除项目
+
 - **URL**: `DELETE /projects/{project_id}`
 
 #### 2.6 添加项目成员
+
 - **URL**: `POST /projects/{project_id}/members`
 - **请求体**:
+  
 ```json
 {
   "member_id": 2,
@@ -205,11 +216,13 @@
 ```
 
 #### 2.7 移除项目成员
+
 - **URL**: `DELETE /projects/{project_id}/members/{member_id}`
 
 ### 3. 分享会管理 (Sessions)
 
 #### 3.1 获取分享会列表
+
 - **URL**: `GET /sessions`
 - **参数**:
   - `skip` (int, optional): 跳过的记录数
@@ -218,11 +231,14 @@
   - `speaker_id` (int, optional): 分享者ID筛选
 
 #### 3.2 获取单个分享会
+
 - **URL**: `GET /sessions/{session_id}`
 
 #### 3.3 创建分享会
+
 - **URL**: `POST /sessions`
 - **请求体**:
+  
 ```json
 {
   "session_number": 1,
@@ -236,14 +252,17 @@
 ```
 
 #### 3.4 更新分享会
+
 - **URL**: `PUT /sessions/{session_id}`
 
 #### 3.5 删除分享会
+
 - **URL**: `DELETE /sessions/{session_id}`
 
 ### 4. 设备管理 (Devices)
 
 #### 4.1 获取设备列表
+
 - **URL**: `GET /devices`
 - **参数**:
   - `skip` (int, optional): 跳过的记录数
@@ -252,11 +271,14 @@
   - `status` (string, optional): 状态筛选 (available/in_use/maintenance/retired)
 
 #### 4.2 获取单个设备
+
 - **URL**: `GET /devices/{device_id}`
 
 #### 4.3 创建设备
+
 - **URL**: `POST /devices`
 - **请求体**:
+  
 ```json
 {
   "name": "MacBook Pro",
@@ -271,17 +293,21 @@
 ```
 
 #### 4.4 更新设备
+
 - **URL**: `PUT /devices/{device_id}`
 
 #### 4.5 删除设备
+
 - **URL**: `DELETE /devices/{device_id}`
 
 ### 5. 首页统计 (Stats)
 
 #### 5.1 获取首页统计
+
 - **URL**: `GET /stats`
 
 **响应示例**:
+
 ```json
 {
   "projects": 12,
@@ -294,6 +320,7 @@
 ### 5. 值日安排 (Duty)
 
 #### 5.1 获取值日安排列表
+
 - **URL**: `GET /duty`
 - **参数**:
   - `skip` (int, optional): 跳过的记录数
@@ -302,11 +329,14 @@
   - `member_id` (int, optional): 成员ID筛选
 
 #### 5.2 获取单个值日安排
+
 - **URL**: `GET /duty/{duty_id}`
 
 #### 5.3 创建值日安排
+
 - **URL**: `POST /duty`
 - **请求体**:
+  
 ```json
 {
   "member_id": 1,
@@ -318,14 +348,17 @@
 ```
 
 #### 5.4 更新值日安排
+
 - **URL**: `PUT /duty/{duty_id}`
 
 #### 5.5 删除值日安排
+
 - **URL**: `DELETE /duty/{duty_id}`
 
 ### 6. 文件管理 (Files)
 
 #### 6.1 获取文件列表
+
 - **URL**: `GET /files`
 - **参数**:
   - `skip` (int, optional): 跳过的记录数
@@ -336,6 +369,7 @@
   - `search` (string, optional): 搜索关键词
 
 **响应示例**:
+
 ```json
 {
   "data": [
@@ -360,9 +394,11 @@
 ```
 
 #### 6.2 获取文件统计
+
 - **URL**: `GET /files/stats`
 
 **响应示例**:
+
 ```json
 {
   "total_files": 100,
@@ -379,13 +415,16 @@
 ```
 
 #### 6.3 获取单个文件
+
 - **URL**: `GET /files/{file_id}`
 
 #### 6.4 下载文件
+
 - **URL**: `GET /files/{file_id}/download`
 - **响应**: 文件流
 
 #### 6.5 上传文件
+
 - **URL**: `POST /files/upload`
 - **Content-Type**: `multipart/form-data`
 - **参数**:
@@ -395,6 +434,7 @@
   - `description` (string, optional): 文件描述
 
 #### 6.6 批量上传文件
+
 - **URL**: `POST /files/batch-upload`
 - **Content-Type**: `multipart/form-data`
 - **参数**:
@@ -403,8 +443,10 @@
   - `session_id` (int, optional): 关联分享会ID
 
 #### 6.7 更新文件信息
+
 - **URL**: `PUT /files/{file_id}`
 - **请求体**:
+  
 ```json
 {
   "original_filename": "新文件名.pdf",
@@ -413,6 +455,7 @@
 ```
 
 #### 6.8 删除文件
+
 - **URL**: `DELETE /files/{file_id}`
 
 ## 错误码说明
@@ -433,6 +476,7 @@
 ## 数据模型
 
 ### Member (成员)
+
 ```json
 {
   "id": "integer",
@@ -451,6 +495,7 @@
 ```
 
 ### Project (项目)
+
 ```json
 {
   "id": "integer",
@@ -469,6 +514,7 @@
 ```
 
 ### Session (分享会)
+
 ```json
 {
   "id": "integer",
@@ -485,6 +531,7 @@
 ```
 
 ### Device (设备)
+
 ```json
 {
   "id": "integer",
@@ -502,6 +549,7 @@
 ```
 
 ### File (文件)
+
 ```json
 {
   "id": "integer",
@@ -600,7 +648,7 @@ def create_member(member_data):
 ## 注意事项
 
 1. **文件上传限制**: 单个文件最大50MB，批量上传最多10个文件
-2. **支持的文件格式**: 
+2. **支持的文件格式**:
    - 文档: PDF, DOC, DOCX, TXT, MD, RTF
    - 图片: JPG, JPEG, PNG, GIF, BMP, WEBP
    - 演示: PPT, PPTX, ODP

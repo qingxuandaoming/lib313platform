@@ -4,6 +4,7 @@ from app.models.session import Session
 from app.models.device import Device, DeviceStatus
 from app.models.duty import DutySchedule
 from app.models.file import File, FileType
+from app.models.user import User
 
 __all__ = [
     "Member",
@@ -17,4 +18,5 @@ __all__ = [
     "DutySchedule",
     "File",
     "FileType",
+    "User",
 ]

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import members, projects, sessions, devices, duty, files, stats
+from app.api.v1.endpoints import members, projects, sessions, devices, duty, files, stats, auth
 
 api_router = APIRouter()
 
@@ -10,3 +10,4 @@ api_router.include_router(devices.router, prefix="/devices", tags=["设备管理
 api_router.include_router(duty.router, prefix="/duty", tags=["值日管理"])
 api_router.include_router(files.router, prefix="/files", tags=["文件管理"])
 api_router.include_router(stats.router, prefix="/stats", tags=["统计"])
+api_router.include_router(auth.router, prefix="/auth", tags=["鉴权"])

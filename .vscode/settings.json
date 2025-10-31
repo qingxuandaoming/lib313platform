@@ -1,9 +1,19 @@
 {
     "cSpell.words": [
+        "autoflush",
+        "dotenv",
+        "fastapi",
         "gunicorn",
+        "LASTEXITCODE",
+        "onupdate",
+        "passlib",
         "psql",
+        "psycopg",
         "pycache",
         "Pydantic",
+        "pytest",
+        "sessionmaker",
+        "sqlalchemy",
         "Uvicorn",
         "yourpassword",
         "zhangsan"

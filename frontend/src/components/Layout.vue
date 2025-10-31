@@ -42,7 +42,22 @@
           </el-menu-item>
         </el-menu>
         <div class="header-actions">
-          <el-button type="primary" @click="handleLogin">登录</el-button>
+          <template v-if="isAuthenticated">
+            <el-dropdown>
+              <span class="el-dropdown-link">
+                <el-icon><User /></el-icon>
+                {{ userLabel }}
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </template>
+          <template v-else>
+            <el-button type="primary" @click="handleLogin">登录</el-button>
+          </template>
         </div>
       </div>
     </el-header>
@@ -64,6 +79,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { 
   House, 
   User, 
@@ -78,14 +94,22 @@ const router = useRouter()
 const route = useRoute()
 
 const activeIndex = computed(() => route.path)
+const auth = useAuthStore()
 
 const handleSelect = (key) => {
   router.push(key)
 }
 
 const handleLogin = () => {
-  // TODO: 实现登录逻辑
-  console.log('登录功能待实现')
+  router.push('/login')
+}
+
+const isAuthenticated = computed(() => auth.isAuthenticated)
+const userLabel = computed(() => auth.user?.username || '已登录')
+
+const logout = () => {
+  auth.logout()
+  router.push('/home')
 }
 </script>
 

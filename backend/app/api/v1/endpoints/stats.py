@@ -1,22 +1,25 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+
 from app.core.database import get_db
-from app.models import Project, Member, Session as SessionModel, Device
-from app.schemas.stats import StatsResponse
+from app.models import Member, Project, Session as SessionModel, Device, File
+
 
 router = APIRouter()
 
 
-@router.get("", response_model=StatsResponse, summary="获取首页统计")
+@router.get("")
 def get_stats(db: Session = Depends(get_db)):
-    projects = db.query(Project).count()
-    members = db.query(Member).count()
-    sessions = db.query(SessionModel).count()
-    devices = db.query(Device).count()
+    members_count = db.query(Member).count()
+    projects_count = db.query(Project).count()
+    sessions_count = db.query(SessionModel).count()
+    devices_count = db.query(Device).count()
+    files_count = db.query(File).count()
 
     return {
-        "projects": projects,
-        "members": members,
-        "sessions": sessions,
-        "devices": devices,
+        "members": members_count,
+        "projects": projects_count,
+        "sessions": sessions_count,
+        "devices": devices_count,
+        "files": files_count,
     }

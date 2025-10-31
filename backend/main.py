@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
-from app.core.database import Base, engine
+from app.core.database import Base, engine, SessionLocal
 # 导入所有模型以确保表被创建
 from app.models import *
 
@@ -9,6 +9,16 @@ settings = get_settings()
 
 # 创建数据库表
 Base.metadata.create_all(bind=engine)
+
+# 初始化默认管理员
+try:
+    from app.services.user_service import ensure_default_admin
+    db = SessionLocal()
+    ensure_default_admin(db)
+    db.close()
+except Exception:
+    # 启动时初始化失败不阻塞服务
+    pass
 
 app = FastAPI(
     title="313实验室开放平台 API",
@@ -19,7 +29,7 @@ app = FastAPI(
 # CORS配置
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:5173"],
+    allow_origins=[settings.FRONTEND_URL, "http://localhost:5173", "http://localhost:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

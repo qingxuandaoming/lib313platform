@@ -13,7 +13,7 @@
 - Node.js 16+
 - npm 或 yarn
 
-### 系统要求
+### 运行环境要求
 
 - 操作系统: Windows 10+, macOS 10.15+, Ubuntu 18.04+
 - 内存: 最少4GB，推荐8GB+
@@ -40,18 +40,21 @@ pip install -r requirements.txt
 #### 2.2 配置数据库
 
 1. 安装PostgreSQL并创建数据库:
+  
 ```sql
 CREATE DATABASE lab313_platform;
 CREATE USER lab313_user WITH PASSWORD 'your_password';
 GRANT ALL PRIVILEGES ON DATABASE lab313_platform TO lab313_user;
 ```
 
-2. 复制环境配置文件:
+1. 复制环境配置文件:
+  
 ```bash
 cp .env.example .env
 ```
 
-3. 编辑 `.env` 文件，配置数据库连接:
+1. 编辑 `.env` 文件，配置数据库连接:
+  
 ```env
 DATABASE_URL=postgresql://lab313_user:your_password@localhost/lab313_platform
 SECRET_KEY=your-secret-key-here
@@ -94,6 +97,7 @@ npm run dev
 前端服务将在 `http://localhost:5173` 启动。
 
 #### 3.3 构建生产版本
+
 ```bash
 npm run build
 ```
@@ -105,6 +109,7 @@ npm run build
 ### 后端配置
 
 #### 环境变量说明
+
 | 变量名 | 说明 | 默认值 | 必需 |
 |--------|------|--------|------|
 | DATABASE_URL | 数据库连接URL | - | 是 |
@@ -112,11 +117,12 @@ npm run build
 | ACCESS_TOKEN_EXPIRE_MINUTES | Token过期时间(分钟) | 30 | 否 |
 | UPLOAD_DIR | 文件上传目录 | ../uploads | 否 |
 | MAX_UPLOAD_SIZE | 最大上传文件大小(字节) | 52428800 | 否 |
-| FRONTEND_URL | 前端URL | http://localhost:5173 | 否 |
+| FRONTEND_URL | 前端URL | <http://localhost:5173> | 否 |
 
 #### 数据库迁移
 
 如果需要更新数据库结构，可以使用以下命令:
+
 ```bash
 # 备份数据库
 pg_dump lab313_platform > backup.sql
@@ -128,6 +134,7 @@ python -c "from app.core.database import engine, Base; from app.models import *;
 ### 前端配置
 
 #### Vite配置 (vite.config.js)
+
 ```javascript
 export default defineConfig({
   plugins: [vue()],
@@ -143,7 +150,9 @@ export default defineConfig({
 ```
 
 #### 环境变量
+
 创建 `.env.local` 文件配置环境变量:
+
 ```env
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 ```
@@ -153,6 +162,7 @@ VITE_API_BASE_URL=http://localhost:8000/api/v1
 ### 使用Docker部署
 
 #### 1. 创建Docker Compose文件
+
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -193,6 +203,7 @@ volumes:
 ```
 
 #### 2. 创建后端Dockerfile
+
 ```dockerfile
 # backend/Dockerfile
 FROM python:3.9-slim
@@ -210,6 +221,7 @@ CMD ["python", "main.py"]
 ```
 
 #### 3. 创建前端Dockerfile
+
 ```dockerfile
 # frontend/Dockerfile
 FROM node:16-alpine as build
@@ -230,6 +242,7 @@ CMD ["nginx", "-g", "daemon off;"]
 ```
 
 #### 4. 启动服务
+
 ```bash
 docker-compose up -d
 ```
@@ -237,6 +250,7 @@ docker-compose up -d
 ### 使用传统方式部署
 
 #### 后端部署 (使用Gunicorn)
+
 ```bash
 # 安装Gunicorn
 pip install gunicorn
@@ -246,12 +260,15 @@ gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8000
 ```
 
 #### 前端部署 (使用Nginx)
+
 1. 构建前端:
+  
 ```bash
 npm run build
 ```
 
-2. 配置Nginx:
+1. 配置Nginx:
+  
 ```nginx
 server {
     listen 80;
@@ -273,6 +290,7 @@ server {
 ## 数据备份与恢复
 
 ### 数据库备份
+
 ```bash
 # 备份数据库
 pg_dump -h localhost -U lab313_user lab313_platform > backup_$(date +%Y%m%d_%H%M%S).sql
@@ -282,6 +300,7 @@ psql -h localhost -U lab313_user lab313_platform < backup_20240101_120000.sql
 ```
 
 ### 文件备份
+
 ```bash
 # 备份上传的文件
 tar -czf uploads_backup_$(date +%Y%m%d_%H%M%S).tar.gz uploads/
@@ -293,13 +312,17 @@ tar -xzf uploads_backup_20240101_120000.tar.gz
 ## 监控与日志
 
 ### 后端日志
+
 后端使用Python的logging模块，日志级别可以通过环境变量 `LOG_LEVEL` 设置:
+
 ```env
 LOG_LEVEL=INFO
 ```
 
 ### 前端错误监控
+
 可以集成Sentry等错误监控服务:
+
 ```javascript
 // main.js
 import * as Sentry from "@sentry/vue";
@@ -311,7 +334,9 @@ Sentry.init({
 ```
 
 ### 性能监控
+
 推荐使用以下工具:
+
 - 后端: Prometheus + Grafana
 - 前端: Google Analytics, Lighthouse
 - 数据库: pgAdmin, pg_stat_statements
@@ -319,7 +344,9 @@ Sentry.init({
 ## 安全配置
 
 ### HTTPS配置
+
 生产环境建议使用HTTPS:
+
 ```nginx
 server {
     listen 443 ssl;
@@ -331,6 +358,7 @@ server {
 ```
 
 ### 防火墙配置
+
 ```bash
 # 只开放必要端口
 ufw allow 22    # SSH
@@ -340,6 +368,7 @@ ufw enable
 ```
 
 ### 数据库安全
+
 1. 修改默认端口
 2. 设置强密码
 3. 限制连接IP
@@ -350,26 +379,31 @@ ufw enable
 ### 常见问题
 
 #### 1. 数据库连接失败
+
 - 检查数据库服务是否启动
 - 验证连接字符串是否正确
 - 确认防火墙设置
 
 #### 2. 文件上传失败
+
 - 检查上传目录权限
 - 验证文件大小限制
 - 确认磁盘空间
 
 #### 3. 前端页面空白
+
 - 检查API接口是否正常
 - 查看浏览器控制台错误
 - 验证路由配置
 
 #### 4. 跨域问题
+
 - 检查CORS配置
 - 验证代理设置
 - 确认域名配置
 
 ### 日志查看
+
 ```bash
 # 查看后端日志
 tail -f backend.log
@@ -385,18 +419,21 @@ tail -f /var/log/postgresql/postgresql-13-main.log
 ## 性能优化
 
 ### 后端优化
+
 1. 使用连接池
 2. 添加数据库索引
 3. 实现缓存机制
 4. 优化SQL查询
 
 ### 前端优化
+
 1. 代码分割
 2. 图片懒加载
 3. 启用Gzip压缩
 4. 使用CDN
 
 ### 数据库优化
+
 1. 定期VACUUM
 2. 分析查询计划
 3. 调整配置参数
@@ -405,6 +442,7 @@ tail -f /var/log/postgresql/postgresql-13-main.log
 ## 更新升级
 
 ### 后端更新
+
 ```bash
 # 备份数据
 pg_dump lab313_platform > backup.sql
@@ -420,6 +458,7 @@ systemctl restart lab313-backend
 ```
 
 ### 前端更新
+
 ```bash
 # 更新代码
 git pull origin main
@@ -437,9 +476,10 @@ cp -r dist/* /var/www/html/
 ## 联系支持
 
 如果遇到问题，请通过以下方式联系:
-- 邮箱: support@313lab.com
-- 文档: https://docs.313lab.com
-- 问题反馈: https://github.com/313lab/platform/issues
+
+- 邮箱: <support@313lab.com>
+- 文档: <https://docs.313lab.com>
+- 问题反馈: <https://github.com/313lab/platform/issues>
 
 ## 许可证
 
