@@ -3,24 +3,25 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
 from app.models.session import Session as SessionModel
-from app.schemas.session import SessionCreate, SessionUpdate, SessionResponse
+from app.schemas.session import SessionCreate, SessionUpdate, SessionResponse, SessionListResponse
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[SessionResponse])
+@router.get("", response_model=SessionListResponse)
 def get_sessions(
     skip: int = 0,
     limit: int = 100,
     semester: str = None,
     db: Session = Depends(get_db)
 ):
-    """获取分享会列表"""
+    """获取分享会列表（标准化返回：{ data, total }）"""
     query = db.query(SessionModel)
     if semester:
         query = query.filter(SessionModel.semester == semester)
+    total = query.count()
     sessions = query.offset(skip).limit(limit).all()
-    return sessions
+    return {"data": sessions, "total": total}
 
 
 @router.get("/{session_id}", response_model=SessionResponse)

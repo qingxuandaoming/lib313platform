@@ -3,24 +3,25 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
 from app.models.device import Device
-from app.schemas.device import DeviceCreate, DeviceUpdate, DeviceResponse
+from app.schemas.device import DeviceCreate, DeviceUpdate, DeviceResponse, DeviceListResponse
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[DeviceResponse])
+@router.get("", response_model=DeviceListResponse)
 def get_devices(
     skip: int = 0,
     limit: int = 100,
     device_type: str = None,
     db: Session = Depends(get_db)
 ):
-    """获取设备列表"""
+    """获取设备列表（标准化返回：{ data, total }）"""
     query = db.query(Device)
     if device_type:
         query = query.filter(Device.device_type == device_type)
+    total = query.count()
     devices = query.offset(skip).limit(limit).all()
-    return devices
+    return {"data": devices, "total": total}
 
 
 @router.get("/{device_id}", response_model=DeviceResponse)

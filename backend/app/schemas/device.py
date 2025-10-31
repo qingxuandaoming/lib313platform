@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from app.models.device import DeviceStatus
 
@@ -43,3 +43,8 @@ class DeviceResponse(DeviceBase):
 
     class Config:
         from_attributes = True
+
+
+class DeviceListResponse(BaseModel):
+    data: List[DeviceResponse]
+    total: int

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -36,3 +36,8 @@ class SessionResponse(SessionBase):
 
     class Config:
         from_attributes = True
+
+
+class SessionListResponse(BaseModel):
+    data: List[SessionResponse]
+    total: int

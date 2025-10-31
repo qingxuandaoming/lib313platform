@@ -3,20 +3,22 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
 from app.models.project import Project, ProjectMember
-from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse
+from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, ProjectListResponse
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[ProjectResponse])
+@router.get("", response_model=ProjectListResponse)
 def get_projects(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db)
 ):
-    """获取项目列表"""
-    projects = db.query(Project).offset(skip).limit(limit).all()
-    return projects
+    """获取项目列表（标准化返回：{ data, total }）"""
+    query = db.query(Project)
+    total = query.count()
+    projects = query.offset(skip).limit(limit).all()
+    return {"data": projects, "total": total}
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)

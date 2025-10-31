@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.database import Base, engine
+# 导入所有模型以确保表被创建
+from app.models import *
 
 settings = get_settings()
 

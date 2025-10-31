@@ -211,8 +211,8 @@ const loadDevices = async () => {
     if (filterStatus.value) {
       params.status = filterStatus.value
     }
-    const data = await getDevices(params)
-    devices.value = data
+    const response = await getDevices(params)
+    devices.value = response?.data ?? []
   } catch (error) {
     ElMessage.error('加载设备列表失败')
   } finally {

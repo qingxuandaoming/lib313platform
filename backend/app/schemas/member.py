@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from app.models.member import MemberRole
 
@@ -41,3 +41,8 @@ class MemberResponse(MemberBase):
 
     class Config:
         from_attributes = True
+
+
+class MemberListResponse(BaseModel):
+    data: List[MemberResponse]
+    total: int

@@ -3,20 +3,22 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
 from app.models.member import Member
-from app.schemas.member import MemberCreate, MemberUpdate, MemberResponse
+from app.schemas.member import MemberCreate, MemberUpdate, MemberResponse, MemberListResponse
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[MemberResponse])
+@router.get("", response_model=MemberListResponse)
 def get_members(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db)
 ):
-    """获取成员列表"""
-    members = db.query(Member).offset(skip).limit(limit).all()
-    return members
+    """获取成员列表（标准化返回：{ data, total }）"""
+    query = db.query(Member)
+    total = query.count()
+    members = query.offset(skip).limit(limit).all()
+    return {"data": members, "total": total}
 
 
 @router.get("/{member_id}", response_model=MemberResponse)

@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <h2>项目展示</h2>
+          <h2>项目管理</h2>
           <el-button type="primary" @click="showAddDialog">
             <el-icon><Plus /></el-icon>
             添加项目
@@ -11,94 +11,156 @@
         </div>
       </template>
 
-      <!-- 筛选栏 -->
-      <div class="filter-bar">
-        <el-select v-model="filterStatus" placeholder="项目状态" clearable style="width: 150px" @change="loadProjects">
-          <el-option label="规划中" value="planning" />
-          <el-option label="进行中" value="in_progress" />
-          <el-option label="已完成" value="completed" />
-          <el-option label="已归档" value="archived" />
-        </el-select>
+      <!-- 搜索栏 -->
+      <div class="search-bar">
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-input
+              v-model="searchName"
+              placeholder="搜索项目名称"
+              clearable
+              @keyup.enter="loadProjects"
+            >
+              <template #prefix>
+                <el-icon><Search /></el-icon>
+              </template>
+            </el-input>
+          </el-col>
+          <el-col :span="6">
+            <el-select v-model="searchStatus" placeholder="选择状态" clearable>
+              <el-option label="规划中" value="planning" />
+              <el-option label="进行中" value="in_progress" />
+              <el-option label="已完成" value="completed" />
+              <el-option label="已归档" value="archived" />
+            </el-select>
+          </el-col>
+          <el-col :span="4">
+            <el-button type="primary" @click="loadProjects">搜索</el-button>
+          </el-col>
+        </el-row>
       </div>
 
-      <!-- 项目卡片展示 -->
-      <div class="projects-grid" v-loading="loading">
-        <el-card v-for="project in projects" :key="project.id" class="project-card" shadow="hover">
-          <div class="project-cover" v-if="project.cover_image">
-            <img :src="project.cover_image" :alt="project.name" />
-          </div>
-          <div class="project-cover placeholder" v-else>
-            <el-icon :size="60"><FolderOpened /></el-icon>
-          </div>
+      <!-- 项目表格 -->
+      <el-table :data="projects" v-loading="loading" stripe>
+        <el-table-column prop="name" label="项目名称" min-width="150" />
+        <el-table-column prop="description" label="项目描述" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getStatusType(row.status)">
+              {{ getStatusText(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="leader_id" label="负责人" width="120">
+          <template #default="{ row }">
+            {{ getMemberName(row.leader_id) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="start_date" label="开始日期" width="120">
+          <template #default="{ row }">
+            {{ row.start_date ? new Date(row.start_date).toLocaleDateString() : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="end_date" label="结束日期" width="120">
+          <template #default="{ row }">
+            {{ row.end_date ? new Date(row.end_date).toLocaleDateString() : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="150" fixed="right">
+          <template #default="{ row }">
+            <el-button size="small" @click="showEditDialog(row)">编辑</el-button>
+            <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
 
-          <div class="project-info">
-            <h3>{{ project.name }}</h3>
-            <p class="description">{{ project.description || '暂无描述' }}</p>
-
-            <div class="project-meta">
-              <el-tag :type="getStatusType(project.status)" size="small">
-                {{ getStatusText(project.status) }}
-              </el-tag>
-              <span class="tags" v-if="project.tags">
-                <el-tag v-for="tag in project.tags.split(',')" :key="tag" size="small" style="margin-left: 5px">
-                  {{ tag }}
-                </el-tag>
-              </span>
-            </div>
-
-            <div class="project-links">
-              <el-link v-if="project.github_url" :href="project.github_url" target="_blank" type="primary">
-                <el-icon><Link /></el-icon> GitHub
-              </el-link>
-              <el-link v-if="project.demo_url" :href="project.demo_url" target="_blank" type="success">
-                <el-icon><View /></el-icon> Demo
-              </el-link>
-            </div>
-
-            <div class="project-actions">
-              <el-button type="primary" size="small" @click="showEditDialog(project)">编辑</el-button>
-              <el-button type="danger" size="small" @click="handleDelete(project)">删除</el-button>
-            </div>
-          </div>
-        </el-card>
+      <!-- 分页 -->
+      <div class="pagination">
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="loadProjects"
+          @current-change="loadProjects"
+        />
       </div>
-
-      <el-empty v-if="!loading && projects.length === 0" description="暂无项目数据" />
     </el-card>
 
     <!-- 添加/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="700px">
-      <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="600px"
+      @close="resetForm"
+    >
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-width="100px"
+      >
         <el-form-item label="项目名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入项目名称" />
         </el-form-item>
 
         <el-form-item label="项目描述" prop="description">
-          <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入项目描述" />
+          <el-input
+            v-model="form.description"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入项目描述"
+          />
         </el-form-item>
 
-        <el-form-item label="项目状态" prop="status">
-          <el-select v-model="form.status" style="width: 100%">
-            <el-option label="规划中" value="planning" />
-            <el-option label="进行中" value="in_progress" />
-            <el-option label="已完成" value="completed" />
-            <el-option label="已归档" value="archived" />
-          </el-select>
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="项目状态" prop="status">
+              <el-select v-model="form.status" placeholder="选择状态" style="width: 100%">
+                <el-option label="规划中" value="planning" />
+                <el-option label="进行中" value="in_progress" />
+                <el-option label="已完成" value="completed" />
+                <el-option label="已归档" value="archived" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="项目负责人" prop="leader_id">
+              <el-select v-model="form.leader_id" placeholder="选择负责人" style="width: 100%">
+                <el-option
+                  v-for="member in members"
+                  :key="member.id"
+                  :label="member.name"
+                  :value="member.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <el-form-item label="项目负责人" prop="leader_id">
-          <el-select v-model="form.leader_id" filterable placeholder="选择负责人" style="width: 100%">
-            <el-option v-for="member in members" :key="member.id" :label="member.name" :value="member.id" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="开始日期" prop="start_date">
-          <el-date-picker v-model="form.start_date" type="datetime" placeholder="选择开始日期" style="width: 100%" />
-        </el-form-item>
-
-        <el-form-item label="结束日期" prop="end_date">
-          <el-date-picker v-model="form.end_date" type="datetime" placeholder="选择结束日期" style="width: 100%" />
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="开始日期" prop="start_date">
+              <el-date-picker
+                v-model="form.start_date"
+                type="date"
+                placeholder="选择开始日期"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="结束日期" prop="end_date">
+              <el-date-picker
+                v-model="form.end_date"
+                type="date"
+                placeholder="选择结束日期"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
 
         <el-form-item label="GitHub地址" prop="github_url">
           <el-input v-model="form.github_url" placeholder="https://github.com/..." />
@@ -124,13 +186,18 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Search } from '@element-plus/icons-vue'
 import { getProjects, createProject, updateProject, deleteProject } from '@/api/project'
 import { getMembers } from '@/api/member'
 
 const loading = ref(false)
 const projects = ref([])
 const members = ref([])
-const filterStatus = ref('')
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+const searchName = ref('')
+const searchStatus = ref('')
 
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -141,8 +208,8 @@ const form = reactive({
   description: '',
   status: 'planning',
   leader_id: null,
-  start_date: null,
-  end_date: null,
+  start_date: '',
+  end_date: '',
   github_url: '',
   demo_url: '',
   tags: ''
@@ -150,6 +217,7 @@ const form = reactive({
 
 const rules = {
   name: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
+  description: [{ required: true, message: '请输入项目描述', trigger: 'blur' }],
   leader_id: [{ required: true, message: '请选择项目负责人', trigger: 'change' }]
 }
 
@@ -159,8 +227,13 @@ const dialogTitle = computed(() => isEdit.value ? '编辑项目' : '添加项目
 const loadProjects = async () => {
   loading.value = true
   try {
-    const data = await getProjects()
-    projects.value = data
+    const params = {
+      skip: (currentPage.value - 1) * pageSize.value,
+      limit: pageSize.value
+    }
+    const response = await getProjects(params)
+    projects.value = response?.data ?? []
+    total.value = response?.total ?? 0
   } catch (error) {
     ElMessage.error('加载项目列表失败')
   } finally {
@@ -171,10 +244,10 @@ const loadProjects = async () => {
 // 加载成员列表
 const loadMembers = async () => {
   try {
-    const data = await getMembers({ limit: 1000 })
-    members.value = data
+    const response = await getMembers({ limit: 1000 })
+    members.value = Array.isArray(response) ? response : (response?.data ?? [])
   } catch (error) {
-    console.error('加载成员列表失败', error)
+    ElMessage.error('加载成员列表失败')
   }
 }
 
@@ -188,7 +261,11 @@ const showAddDialog = () => {
 // 显示编辑对话框
 const showEditDialog = (row) => {
   isEdit.value = true
-  Object.assign(form, row)
+  Object.assign(form, {
+    ...row,
+    start_date: row.start_date ? new Date(row.start_date).toISOString().split('T')[0] : '',
+    end_date: row.end_date ? new Date(row.end_date).toISOString().split('T')[0] : ''
+  })
   dialogVisible.value = true
 }
 
@@ -199,8 +276,8 @@ const resetForm = () => {
     description: '',
     status: 'planning',
     leader_id: null,
-    start_date: null,
-    end_date: null,
+    start_date: '',
+    end_date: '',
     github_url: '',
     demo_url: '',
     tags: ''
@@ -213,11 +290,17 @@ const handleSubmit = async () => {
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
+        const submitData = {
+          ...form,
+          start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
+          end_date: form.end_date ? new Date(form.end_date).toISOString() : null
+        }
+        
         if (isEdit.value) {
-          await updateProject(form.id, form)
+          await updateProject(form.id, submitData)
           ElMessage.success('更新成功')
         } else {
-          await createProject(form)
+          await createProject(submitData)
           ElMessage.success('添加成功')
         }
         dialogVisible.value = false
@@ -252,7 +335,7 @@ const getStatusType = (status) => {
     planning: 'info',
     in_progress: 'warning',
     completed: 'success',
-    archived: 'info'
+    archived: 'danger'
   }
   return types[status] || 'info'
 }
@@ -266,6 +349,12 @@ const getStatusText = (status) => {
     archived: '已归档'
   }
   return texts[status] || status
+}
+
+// 获取成员姓名
+const getMemberName = (memberId) => {
+  const member = members.value.find(m => m.id === memberId)
+  return member ? member.name : '未知'
 }
 
 onMounted(() => {
@@ -289,86 +378,62 @@ onMounted(() => {
   margin: 0;
 }
 
-.filter-bar {
+.search-bar {
   margin-bottom: 20px;
 }
 
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+.pagination {
   margin-top: 20px;
-}
-
-.project-card {
-  transition: transform 0.2s;
-}
-
-.project-card:hover {
-  transform: translateY(-5px);
-}
-
-.project-cover {
-  width: 100%;
-  height: 180px;
-  overflow: hidden;
-  border-radius: 4px;
-  margin-bottom: 15px;
-  background: #f5f7fa;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
-.project-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.project-cover.placeholder {
-  color: #c0c4cc;
-}
-
-.project-info h3 {
-  margin: 0 0 10px 0;
-  font-size: 18px;
-  color: #303133;
-}
-
-.description {
-  color: #606266;
-  font-size: 14px;
-  margin-bottom: 10px;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+.el-table {
+  border-radius: 8px;
   overflow: hidden;
 }
 
-.project-meta {
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 5px;
+.el-dialog .el-form {
+  padding: 0 20px;
 }
 
-.project-links {
-  margin-bottom: 15px;
-  display: flex;
-  gap: 15px;
-}
-
-.project-actions {
-  display: flex;
-  gap: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #ebeef5;
-}
-
-.project-actions .el-button {
-  flex: 1;
+.el-form-item {
+  margin-bottom: 20px;
 }
 </style>
+.projects-container {
+  padding: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header h2 {
+  margin: 0;
+}
+
+.search-bar {
+  margin-bottom: 20px;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.el-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.el-dialog .el-form {
+  padding: 0 20px;
+}
+
+.el-form-item {
+  margin-bottom: 20px;
+}

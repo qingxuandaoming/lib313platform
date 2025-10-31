@@ -46,3 +46,8 @@ class ProjectResponse(ProjectBase):
 
     class Config:
         from_attributes = True
+
+
+class ProjectListResponse(BaseModel):
+    data: List[ProjectResponse]
+    total: int

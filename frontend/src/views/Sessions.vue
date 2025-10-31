@@ -173,8 +173,8 @@ const loadSessions = async () => {
     if (searchSemester.value) {
       params.semester = searchSemester.value
     }
-    const data = await getSessions(params)
-    sessions.value = data
+    const response = await getSessions(params)
+    sessions.value = response?.data ?? []
   } catch (error) {
     ElMessage.error('加载分享会列表失败')
   } finally {
