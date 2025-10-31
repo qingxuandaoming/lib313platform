@@ -48,18 +48,17 @@ class FileStats(BaseModel):
     total_size_mb: float
     type_stats: dict
 
+class FailedFileItem(BaseModel):
+    filename: str
+    error: str
+
 
 class BatchUploadResponse(BaseModel):
     uploaded_files: List[FileResponse]
-    failed_files: Optional[List["FailedFileItem"]] = None
+    failed_files: Optional[List[FailedFileItem]] = None
     message: Optional[str] = None
 
 
 class FileListResponse(BaseModel):
     data: List[FileResponse]
     total: int
-
-
-class FailedFileItem(BaseModel):
-    filename: str
-    error: str

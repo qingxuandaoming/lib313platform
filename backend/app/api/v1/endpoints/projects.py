@@ -1,21 +1,36 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.core.database import get_db
-from app.models.project import Project, ProjectMember
-from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, ProjectListResponse
+from app.models.project import Project, ProjectMember, ProjectStatus
+from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, ProjectListResponse, ProjectStats
 
 router = APIRouter()
 
 
 @router.get("", response_model=ProjectListResponse)
 def get_projects(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    status: Optional[ProjectStatus] = Query(None),
+    search: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
     """获取项目列表（标准化返回：{ data, total }）"""
     query = db.query(Project)
+
+    # 筛选条件
+    if status:
+        query = query.filter(Project.status == status)
+    if search:
+        query = query.filter(
+            Project.name.contains(search) |
+            Project.description.contains(search)
+        )
+
+    # 按创建时间倒序
+    query = query.order_by(Project.created_at.desc())
+
     total = query.count()
     projects = query.offset(skip).limit(limit).all()
     return {"data": projects, "total": total}
@@ -90,6 +105,23 @@ def delete_project(project_id: int, db: Session = Depends(get_db)):
     db.delete(db_project)
     db.commit()
     return None
+
+
+@router.get("/stats", response_model=ProjectStats)
+def get_project_stats(db: Session = Depends(get_db)):
+    """获取项目统计信息"""
+    total_projects = db.query(Project).count()
+
+    # 按状态统计
+    status_stats = {}
+    for status in ProjectStatus:
+        count = db.query(Project).filter(Project.status == status).count()
+        status_stats[status.value] = count
+
+    return {
+        "total_projects": total_projects,
+        "status_stats": status_stats,
+    }
 
 
 @router.post("/{project_id}/members/{member_id}", status_code=status.HTTP_201_CREATED)

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime
 from app.models.project import ProjectStatus
 
@@ -51,3 +51,8 @@ class ProjectResponse(ProjectBase):
 class ProjectListResponse(BaseModel):
     data: List[ProjectResponse]
     total: int
+
+
+class ProjectStats(BaseModel):
+    total_projects: int
+    status_stats: Dict[str, int]
