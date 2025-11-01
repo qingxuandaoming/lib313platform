@@ -46,8 +46,8 @@
             </div>
             <div class="calendar-cell">
               <div class="member-info">
-                <el-avatar :size="32" :src="schedule.member?.avatar" />
-                <span class="member-name">{{ schedule.member?.name }}</span>
+                <el-avatar :size="32" :src="resolveMember(schedule)?.avatar" />
+                <span class="member-name">{{ resolveMember(schedule)?.name || '—' }}</span>
               </div>
             </div>
             <div class="calendar-cell">
@@ -124,7 +124,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getDutySchedules, createDutySchedule, updateDutySchedule, deleteDutySchedule, completeDuty as apiCompleteDuty } from '@/api/duty'
+import { getDutySchedules, createDutySchedule, updateDutySchedule, deleteDutySchedule, completeDuty as apiCompleteDuty, generateDutySchedules } from '@/api/duty'
 import { getMembers } from '@/api/member'
 
 const loading = ref(false)
@@ -185,6 +185,15 @@ const loadMembers = async () => {
     console.error('加载成员列表失败', error)
     members.value = []
   }
+}
+
+// 根据后端返回的关系或本地成员表，解析显示用的成员信息
+const resolveMember = (schedule) => {
+  if (!schedule) return null
+  if (schedule.member) return schedule.member
+  const id = schedule.member_id
+  if (!id || !Array.isArray(members.value)) return null
+  return members.value.find(m => m.id === id) || null
 }
 
 // 显示添加对话框
@@ -324,15 +333,36 @@ const handleDelete = (row) => {
   })
 }
 
-// 生成排班
-const generateSchedule = () => {
-  ElMessageBox.confirm('这将为接下来的一周自动生成值日排班，确定要继续吗？', '生成排班', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'info'
-  }).then(() => {
-    ElMessage.info('排班生成功能开发中...')
-  })
+// 生成排班（默认下周一开始，1 周，优先同年级一组）
+const generateSchedule = async () => {
+  try {
+    await ElMessageBox.confirm('这将为接下来的一周自动生成值日排班，确定要继续吗？', '生成排班', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'info'
+    })
+
+    const today = new Date()
+    const dow = today.getDay() // 0=Sun,1=Mon,...
+    const daysToNextMonday = ((1 - dow + 7) % 7) || 7
+    const nextMonday = new Date(today)
+    nextMonday.setDate(today.getDate() + daysToNextMonday)
+
+    const payload = {
+      start_date: nextMonday.toISOString().split('T')[0],
+      weeks: 1,
+      prefer_same_grade: true,
+      skip_weekends: false
+    }
+
+    const resp = await generateDutySchedules(payload)
+    const createdCount = Array.isArray(resp?.data) ? resp.data.length : (resp?.total ?? 0)
+    ElMessage.success(`排班生成成功，共创建 ${createdCount} 条记录`)
+    loadDutySchedules()
+  } catch (error) {
+    if (error === 'cancel') return
+    ElMessage.error(getErrorMessage(error))
+  }
 }
 
 // 格式化日期

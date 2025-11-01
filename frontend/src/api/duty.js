@@ -51,3 +51,12 @@ export function completeDuty(id, completionNotes) {
     params: { completion_notes: completionNotes }
   })
 }
+
+// 生成排班（按周、同年级为组）
+export function generateDutySchedules(data) {
+  return request({
+    url: '/duty/generate',
+    method: 'post',
+    data
+  })
+}
