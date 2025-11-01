@@ -1,7 +1,11 @@
 import axios from 'axios'
 
+// 通过环境变量控制 API 基础地址；
+// 桌面端（Electron）应指定完整的 https://api.<domain>/api/v1
+const baseURL = import.meta.env?.VITE_API_BASE_URL || '/api/v1'
+
 const request = axios.create({
-  baseURL: '/api/v1',
+  baseURL,
   timeout: 10000
 })
 

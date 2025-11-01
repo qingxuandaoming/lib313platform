@@ -326,6 +326,33 @@ const resetForm = () => {
   formRef.value?.clearValidate()
 }
 
+// 将空字符串字段从提交的payload中移除，避免后端422（如EmailStr不接受空字符串）
+const buildMemberPayload = () => {
+  const payload = { ...form }
+  // 创建时不需要id
+  delete payload.id
+  ;['email', 'github', 'bio', 'phone', 'avatar'].forEach((key) => {
+    const v = payload[key]
+    if (v === '' || v === undefined || v === null) {
+      delete payload[key]
+    }
+  })
+  return payload
+}
+
+// 统一错误信息提取为字符串，避免向ElMessage传入数组/对象导致渲染报错
+const getErrorMessage = (error) => {
+  const detail = error?.response?.data?.detail
+  if (!detail) return '操作失败'
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    return detail
+      .map((d) => (d?.msg || d?.message || JSON.stringify(d)))
+      .join('；')
+  }
+  return typeof detail === 'object' ? JSON.stringify(detail) : String(detail)
+}
+
 // 提交表单
 const handleSubmit = async () => {
   if (!formRef.value) return
@@ -334,19 +361,19 @@ const handleSubmit = async () => {
     if (valid) {
       submitting.value = true
       try {
+        const payload = buildMemberPayload()
         if (isEdit.value) {
-          await memberApi.updateMember(form.id, form)
+          await memberApi.updateMember(form.id, payload)
           ElMessage.success('更新成功')
         } else {
-          await memberApi.createMember(form)
+          await memberApi.createMember(payload)
           ElMessage.success('添加成功')
         }
         dialogVisible.value = false
         loadMembers()
       } catch (error) {
         console.error('操作失败:', error)
-        const message = error.response?.data?.detail || '操作失败'
-        ElMessage.error(message)
+        ElMessage.error(getErrorMessage(error))
       } finally {
         submitting.value = false
       }
@@ -371,8 +398,7 @@ const handleDelete = (row) => {
       loadMembers()
     } catch (error) {
       console.error('删除失败:', error)
-      const message = error?.response?.data?.detail || '删除失败'
-      ElMessage.error(message)
+      ElMessage.error(getErrorMessage(error) || '删除失败')
     }
   }).catch(() => {
     // 用户取消删除

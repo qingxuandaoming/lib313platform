@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import Layout from '@/components/Layout.vue'
 
 const routes = [
@@ -47,12 +47,22 @@ const routes = [
         name: 'Files',
         component: () => import('@/views/Files.vue')
       }
+      ,
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/views/Profile.vue')
+      }
     ]
   }
 ]
 
+// 根据环境变量决定路由模式：桌面端建议使用哈希路由
+const routerMode = (import.meta.env?.VITE_ROUTER_MODE || 'history').toLowerCase()
+const history = routerMode === 'hash' ? createWebHashHistory() : createWebHistory()
+
 const router = createRouter({
-  history: createWebHistory(),
+  history,
   routes
 })
 

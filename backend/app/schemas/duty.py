@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import date
+from app.schemas.member import MemberResponse
 
 
 class DutyScheduleBase(BaseModel):
@@ -25,6 +26,7 @@ class DutyScheduleUpdate(BaseModel):
 class DutyScheduleResponse(DutyScheduleBase):
     id: int
     completed_at: Optional[date] = None
+    member: Optional[MemberResponse] = None
 
     class Config:
         from_attributes = True
@@ -33,3 +35,13 @@ class DutyScheduleResponse(DutyScheduleBase):
 class DutyScheduleListResponse(BaseModel):
     data: List[DutyScheduleResponse]
     total: int
+
+
+class DutyGenerateRequest(BaseModel):
+    start_date: date
+    weeks: int = 1
+    prefer_same_grade: bool = True
+    skip_weekends: bool = False
+
+    class Config:
+        from_attributes = True
