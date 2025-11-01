@@ -1,7 +1,7 @@
 # TODO（近期计划）
 
-
 ## UI 优化
+
 - 登录与错误反馈：统一错误文案、加载态与禁用状态，失败重试与指引。
 - 列表性能：成员/项目/文件页引入列表虚拟化或分页优化，降低大数据集渲染开销。
 - 状态提示：全局 Loading/Skeleton、空态与异常态统一风格。
@@ -10,6 +10,7 @@
 - 路由守卫：未登录跳转登录页；无权限访问提示。
 
 ## Windows 桌面端计划（Electron）
+
 - 前端改造：
   - `VITE_API_BASE_URL=https://api.<your_domain>/api/v1`；
   - `VITE_ROUTER_MODE=hash`（桌面端建议）。
@@ -19,6 +20,7 @@
 - 自动更新（选做）：后续接入 `electron-updater`。
 
 ## 后端与运维
+
 - 服务器规格与并发：按 `≥50` 并发与 `≥100GB` 存储配置，详见 `docs/DEPLOYMENT.md`。
 - CORS 白名单：网页端与桌面端域名；Electron 兼容 `Origin: null` 或使用 `allow_origin_regex`。
 - 数据库优化：连接池参数、索引与慢查询监控；备份与恢复演练。
@@ -26,6 +28,7 @@
 - 监控与告警：Prometheus/Grafana 指标与阈值告警；集中日志与崩溃上报。
 
 ## 文档完善
+
 - 桌面端计划文档：`docs/windows_desktop_plan.md`（已初版，后续补充截图与示例）。
 - 部署指南：生产规格、反代与参数建议（已补充）。
 - 快速开始：环境变量与桌面端说明（已补充）。

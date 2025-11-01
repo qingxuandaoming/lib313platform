@@ -177,11 +177,25 @@ VITE_ROUTER_MODE=hash
   - 请求头：`Authorization: Bearer <access_token>`
 
 > 提示：首次登录会自动创建或重置默认管理员（用户名/密码取自 `.env` 或默认 `admin/admin123`）。
-
 > 返回结构说明：
+> 提示：`frontend/src/utils/request.js` 读取 `VITE_API_BASE_URL` 作为请求基础地址；`router/index.js` 可根据 `VITE_ROUTER_MODE` 切换 `createWebHistory` 或 `createWebHashHistory`。
+>
+> 提示：首次登录会自动创建或重置默认管理员（用户名/密码取自 `.env` 或默认 `admin/admin123`）。
+> 返回结构说明：
+> 提示：`frontend/src/utils/request.js` 读取 `VITE_API_BASE_URL` 作为请求基础地址；`router/index.js` 可根据 `VITE_ROUTER_MODE` 切换 `createWebHistory` 或 `createWebHashHistory`。
+>
+> 提示：首次登录会自动创建或重置默认管理员（用户名/密码取自 `.env` 或默认 `admin/admin123`）。
+> 返回结构说明：
+
 > - 所有列表（成员、项目、分享会、设备、值日、文件）：统一返回 `{ data: [...], total: N }`
 > - 批量上传 `POST /api/v1/files/batch-upload`：返回 `BatchUploadResponse`，包含 `uploaded_files`、`failed_files`（可为空）和 `message`
+> 前端令牌使用：在 `frontend/src/utils/request.js` 的请求拦截器中为需要认证的请求添加 `Authorization: Bearer <token>`。
 
+> - 所有列表（成员、项目、分享会、设备、值日、文件）：统一返回 `{ data: [...], total: N }`
+> - 批量上传 `POST /api/v1/files/batch-upload`：返回 `BatchUploadResponse`，包含 `uploaded_files`、`failed_files`（可为空）和 `message`
+> 前端令牌使用：在 `frontend/src/utils/request.js` 的请求拦截器中为需要认证的请求添加 `Authorization: Bearer <token>`。
+> - 所有列表（成员、项目、分享会、设备、值日、文件）：统一返回 `{ data: [...], total: N }`
+> - 批量上传 `POST /api/v1/files/batch-upload`：返回 `BatchUploadResponse`，包含 `uploaded_files`、`failed_files`（可为空）和 `message`
 > 前端令牌使用：在 `frontend/src/utils/request.js` 的请求拦截器中为需要认证的请求添加 `Authorization: Bearer <token>`。
 
 ## 六、桌面端（Electron）快速说明

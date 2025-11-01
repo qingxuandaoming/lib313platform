@@ -1,10 +1,10 @@
 <template>
   <el-container class="layout-container">
     <!-- 顶部导航栏 -->
-    <el-header class="layout-header">
+    <el-header class="layout-header glass-surface">
       <div class="header-content">
         <div class="logo">
-          <h2>313实验室开放平台</h2>
+          <h2 class="text-strong">313实验室开放平台</h2>
         </div>
         <el-menu
           :default-active="activeIndex"
@@ -50,6 +50,7 @@
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
+                  <el-dropdown-item @click="goProfile">个人中心</el-dropdown-item>
                   <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -68,9 +69,9 @@
     </el-main>
 
     <!-- 底部 -->
-    <el-footer class="layout-footer">
+    <el-footer class="layout-footer glass-surface">
       <div class="footer-content">
-        <p>&copy; 2024 313实验室开放平台. All rights reserved.</p>
+        <p class="text-soft">&copy; 2024 313实验室开放平台. All rights reserved.</p>
       </div>
     </el-footer>
   </el-container>
@@ -111,6 +112,10 @@ const logout = () => {
   auth.logout()
   router.push('/home')
 }
+
+const goProfile = () => {
+  router.push('/profile')
+}
 </script>
 
 <style scoped>
@@ -119,8 +124,8 @@ const logout = () => {
 }
 
 .layout-header {
-  background-color: #fff;
-  border-bottom: 1px solid #e4e7ed;
+  background: transparent;
+  border-bottom: 1px solid transparent;
   padding: 0;
 }
 
@@ -136,7 +141,7 @@ const logout = () => {
 
 .logo h2 {
   margin: 0;
-  color: #409eff;
+  color: var(--text-strong);
   font-weight: 600;
 }
 
@@ -152,14 +157,14 @@ const logout = () => {
 }
 
 .layout-main {
-  background-color: #f5f7fa;
+  background-color: transparent;
   min-height: calc(100vh - 120px);
   padding: 20px;
 }
 
 .layout-footer {
-  background-color: #fff;
-  border-top: 1px solid #e4e7ed;
+  background: transparent;
+  border-top: 1px solid transparent;
   height: 60px;
   display: flex;
   align-items: center;
@@ -168,7 +173,7 @@ const logout = () => {
 
 .footer-content {
   text-align: center;
-  color: #909399;
+  color: var(--text-soft);
   font-size: 14px;
 }
 </style>

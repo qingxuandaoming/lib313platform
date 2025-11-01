@@ -369,12 +369,12 @@ onMounted(() => {
 .stat-value {
   font-size: 2rem;
   font-weight: 600;
-  color: #303133;
+  color: var(--text-strong);
   margin-bottom: 4px;
 }
 
 .stat-label {
-  color: #909399;
+  color: var(--text-soft);
   font-size: 14px;
 }
 
@@ -394,7 +394,7 @@ onMounted(() => {
 
 .recent-item {
   padding: 16px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .recent-item:last-child {
@@ -403,12 +403,12 @@ onMounted(() => {
 
 .recent-item h4 {
   margin: 0 0 8px 0;
-  color: #303133;
+  color: var(--text-strong);
 }
 
 .recent-item p {
   margin: 0 0 12px 0;
-  color: #606266;
+  color: var(--text-soft);
   font-size: 14px;
 }
 
@@ -419,7 +419,7 @@ onMounted(() => {
 }
 
 .date {
-  color: #909399;
+  color: var(--text-soft);
   font-size: 12px;
 }
 
@@ -445,7 +445,7 @@ onMounted(() => {
 
 .empty-state {
   text-align: center;
-  color: #909399;
+  color: var(--text-soft);
   padding: 40px 0;
 }
 </style>

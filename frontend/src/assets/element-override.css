@@ -1,0 +1,228 @@
+/* 覆盖 Element Plus 变量，使组件与主题联动 */
+
+/* 通用默认 */
+:root {
+  --el-bg-color: rgba(255, 255, 255, 0.06);
+  --el-bg-color-overlay: rgba(255, 255, 255, 0.10);
+  --el-text-color-primary: #eaeaea;
+  --el-text-color-regular: #cfcfcf;
+  --el-text-color-secondary: rgba(235,235,235,0.7);
+  --el-border-color: rgba(255, 255, 255, 0.22);
+  /* Glow 强度变量（默认中档） */
+  --glow-offset-btn: 8px;
+  --glow-elev-btn: 18px;
+  --glow-offset-card: 14px;
+  --glow-elev-card: 34px;
+  --glow-offset-menu: 8px;
+  --glow-elev-menu: 22px;
+  --glow-offset-table: 6px;
+  --glow-elev-table: 18px;
+}
+
+/* 青釉主题下的变量调优 */
+:root[data-theme='qing'] {
+  --el-bg-color: rgba(255, 255, 255, 0.06);
+  --el-bg-color-overlay: rgba(255, 255, 255, 0.10);
+  --el-text-color-primary: var(--text-strong);
+  --el-text-color-regular: var(--text-soft);
+  --el-text-color-secondary: rgba(235,235,235,0.7);
+  --el-border-color: var(--glass-border);
+}
+
+/* 绛红主题下的变量调优 */
+:root[data-theme='jiang'] {
+  --el-bg-color: rgba(255, 255, 255, 0.06);
+  --el-bg-color-overlay: rgba(255, 255, 255, 0.12);
+  --el-text-color-primary: var(--text-strong);
+  --el-text-color-regular: var(--text-soft);
+  --el-text-color-secondary: rgba(245, 225, 220, 0.7);
+  --el-border-color: var(--glass-border);
+}
+
+/* 全局卡片与浮层采用玻璃态背景 */
+.el-card,
+.el-dialog,
+.el-dropdown-menu,
+.el-message-box,
+.el-select-dropdown,
+.el-popover,
+.el-notification {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-color: var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+
+/* 高清晰模式：用于密集数据页面（列表/表格） */
+:root[data-clarity='high'] .el-table__header-wrapper,
+:root[data-clarity='high'] .el-table__body-wrapper {
+  background: rgba(18, 18, 18, 0.42) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-color: rgba(255,255,255,0.18) !important;
+}
+:root[data-clarity='high'] .el-table__row {
+  background-color: rgba(0, 0, 0, 0.24) !important;
+}
+:root[data-clarity='high'] .el-table__row:hover {
+  background-color: rgba(0, 0, 0, 0.30) !important;
+  box-shadow: 0 var(--glow-offset-table) var(--glow-elev-table) var(--glow-color, var(--el-color-primary));
+}
+/* 进一步提升高清晰模式下表格的局部变量与表头可读性 */
+:root[data-clarity='high'] {
+  --el-table-row-bg-color: rgba(0, 0, 0, 0.24);
+  --el-table-row-hover-bg-color: rgba(0, 0, 0, 0.30);
+  --el-table-header-bg-color: rgba(0, 0, 0, 0.38);
+  --el-table-border-color: rgba(255, 255, 255, 0.16);
+  --el-table-text-color: var(--text-strong);
+}
+:root[data-clarity='high'] .el-table__header-wrapper table,
+:root[data-clarity='high'] .el-table__header,
+:root[data-clarity='high'] .el-table__header th {
+  background-color: rgba(0, 0, 0, 0.38) !important;
+  color: var(--text-strong) !important;
+}
+:root[data-clarity='high'] .el-table--striped .el-table__row--striped {
+  background-color: rgba(0, 0, 0, 0.26) !important;
+}
+
+/* 斑马线行文字强制使用深色，避免浅底浅字导致不清晰 */
+:root[data-clarity='high'] .el-table--striped .el-table__row--striped td,
+:root[data-clarity='high'] .el-table--striped .el-table__row--striped .cell {
+  color: var(--text-strong-dark) !important;
+}
+
+/* 自动对比：根据 data-bg(light/dark) 切换文字颜色 */
+:root {
+  --text-strong-light: #ffffff;
+  --text-strong-dark: #111111;
+}
+.el-table__row[data-bg='light'] td,
+.el-table__row[data-bg='light'] .cell {
+  color: var(--text-strong-dark) !important;
+}
+.el-table__row[data-bg='dark'] td,
+.el-table__row[data-bg='dark'] .cell {
+  color: var(--text-strong-light) !important;
+}
+.el-table__header-wrapper th[data-bg='light'] {
+  color: var(--text-strong-dark) !important;
+}
+.el-table__header-wrapper th[data-bg='dark'] {
+  color: var(--text-strong-light) !important;
+}
+:root[data-clarity='high'] .el-table--striped .el-table__row--striped {
+  background-color: rgba(0, 0, 0, 0.26) !important; /* 第二行等斑马线加深 */
+}
+:root[data-clarity='high'] .el-table--striped .el-table__row--striped:hover {
+  background-color: rgba(0, 0, 0, 0.32) !important;
+}
+:root[data-clarity='high'] .el-table .cell,
+:root[data-clarity='high'] .el-table th .cell {
+  color: var(--text-strong);
+  text-shadow: none !important;
+}
+
+:root[data-clarity='high'] .el-input__wrapper,
+:root[data-clarity='high'] .el-select .el-input__wrapper,
+:root[data-clarity='high'] .el-textarea__inner {
+  background-color: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255,255,255,0.22);
+}
+
+/* 文字颜色与链接 */
+body,
+.el-card,
+.el-table,
+.el-form,
+.el-input,
+.el-select,
+.el-button,
+.el-dropdown,
+.el-menu {
+  color: var(--el-text-color-primary);
+}
+.el-link, a { color: var(--el-color-primary); }
+
+/* 表格分隔线与边框弱化为主题边界色 */
+.el-table,
+.el-table th,
+.el-table td {
+  border-color: var(--el-border-color);
+}
+
+/* 文本锐化：移除小字号文字阴影，提升清晰度 */
+.el-table .cell,
+.el-table th .cell,
+.el-form-item__label,
+.el-input__inner,
+.el-input__wrapper input,
+.el-textarea__inner,
+.el-dropdown-menu__item,
+.el-menu-item,
+.el-breadcrumb *,
+.el-button {
+  text-shadow: none !important;
+}
+.el-table th .cell { font-weight: 600; }
+.el-table .cell { font-weight: 500; }
+
+/* —— 悬浮动效与光晕：HarmonyOS 6.0 风格 —— */
+/* 按钮 hover 光晕与微动效 */
+.el-button {
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, color .18s ease;
+}
+.el-button:not(.is-disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 var(--glow-offset-btn) var(--glow-elev-btn) var(--glow-color, var(--el-color-primary));
+}
+
+/* 卡片 hover 光晕 */
+.el-card {
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+.el-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 var(--glow-offset-card) var(--glow-elev-card) var(--glow-color, var(--el-color-primary));
+}
+
+/* 输入框与选择器 hover 光晕 */
+.el-input__wrapper,
+.el-select .el-input__wrapper,
+.el-textarea__inner {
+  transition: box-shadow .18s ease, border-color .18s ease, background-color .18s ease;
+}
+.el-input__wrapper:hover,
+.el-select .el-input__wrapper:hover,
+.el-textarea__inner:hover {
+  box-shadow: 0 0 0 2px var(--el-color-primary) inset, 0 0 12px var(--glow-color, var(--el-color-primary));
+}
+
+/* 水平菜单项 hover 光晕 */
+.el-menu--horizontal > .el-menu-item,
+.el-menu--horizontal > .el-sub-menu {
+  transition: color .18s ease, background-color .18s ease, box-shadow .18s ease;
+  border-radius: 10px;
+}
+.el-menu--horizontal > .el-menu-item:hover,
+.el-menu--horizontal > .el-sub-menu:hover {
+  color: var(--el-color-primary);
+  background-color: rgba(255,255,255,0.08);
+  text-shadow: 0 0 6px var(--glow-color, var(--el-color-primary));
+  box-shadow: 0 var(--glow-offset-menu) var(--glow-elev-menu) var(--glow-color, var(--el-color-primary));
+}
+
+/* 表格行与悬浮清晰度 */
+.el-table__row {
+  transition: background-color .18s ease, box-shadow .18s ease;
+  background-color: rgba(255,255,255,0.06);
+}
+.el-table__row:hover {
+  background-color: rgba(255,255,255,0.10);
+  box-shadow: 0 var(--glow-offset-table) var(--glow-elev-table) var(--glow-color, var(--el-color-primary));
+}
+.el-table--striped .el-table__row--striped {
+  background-color: rgba(255,255,255,0.08);
+}
