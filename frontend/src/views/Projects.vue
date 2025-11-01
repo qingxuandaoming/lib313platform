@@ -314,17 +314,21 @@ const handleSubmit = async () => {
 
 // 删除项目
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`确定要删除项目 ${row.name} 吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
+  ElMessageBox.confirm(
+    `此操作将删除项目 "${row.name}"，并级联删除：项目成员关系与关联文件（物理文件也会被删除），不可恢复。是否继续？`,
+    '级联删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
     try {
       await deleteProject(row.id)
       ElMessage.success('删除成功')
       loadProjects()
     } catch (error) {
-      ElMessage.error('删除失败')
+      ElMessage.error(error.response?.data?.detail || '删除失败')
     }
   })
 }

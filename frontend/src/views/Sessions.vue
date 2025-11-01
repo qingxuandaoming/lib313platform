@@ -243,17 +243,21 @@ const handleSubmit = async () => {
 
 // 删除分享会
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`确定要删除分享会 "${row.title}" 吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
+  ElMessageBox.confirm(
+    `此操作将删除分享会 "${row.title}"，并级联删除其关联文件（物理文件也会被删除），不可恢复。是否继续？`,
+    '级联删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
     try {
       await deleteSession(row.id)
       ElMessage.success('删除成功')
       loadSessions()
     } catch (error) {
-      ElMessage.error('删除失败')
+      ElMessage.error(error.response?.data?.detail || '删除失败')
     }
   })
 }

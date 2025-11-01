@@ -356,18 +356,23 @@ const handleSubmit = async () => {
 
 // 删除成员
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`确定要删除成员 ${row.name} 吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
+  ElMessageBox.confirm(
+    `此操作将删除成员 "${row.name}"，并级联删除其项目成员关系与值日安排，同时解除其作为项目负责人、设备分配及文件上传者关联。不可恢复，是否继续？`,
+    '级联删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
     try {
       await memberApi.deleteMember(row.id)
       ElMessage.success('删除成功')
       loadMembers()
     } catch (error) {
       console.error('删除失败:', error)
-      ElMessage.error('删除失败')
+      const message = error?.response?.data?.detail || '删除失败'
+      ElMessage.error(message)
     }
   }).catch(() => {
     // 用户取消删除

@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "autoflush",
+        "daterange",
         "dotenv",
         "fastapi",
         "gunicorn",
@@ -12,6 +13,7 @@
         "pycache",
         "Pydantic",
         "pytest",
+        "sess",
         "sessionmaker",
         "sqlalchemy",
         "Uvicorn",

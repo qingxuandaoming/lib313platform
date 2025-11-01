@@ -4,6 +4,8 @@ from typing import List
 from app.core.database import get_db
 from app.models.session import Session as SessionModel
 from app.schemas.session import SessionCreate, SessionUpdate, SessionResponse, SessionListResponse
+from app.models.file import File as FileModel
+import os
 
 router = APIRouter()
 
@@ -77,7 +79,17 @@ def delete_session(session_id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="分享会不存在"
         )
+    # 级联删除：删除关联文件（包含物理文件）
+    files = db.query(FileModel).filter(FileModel.session_id == session_id).all()
+    for f in files:
+        if f.file_path and os.path.exists(f.file_path):
+            try:
+                os.remove(f.file_path)
+            except Exception as e:
+                print(f"删除文件失败: {e}")
+        db.delete(f)
 
+    # 删除分享会
     db.delete(db_session)
     db.commit()
     return None

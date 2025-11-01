@@ -332,17 +332,21 @@ const handleReturn = async () => {
 
 // 删除设备
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`确定要删除设备 "${row.name}" 吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
+  ElMessageBox.confirm(
+    `此操作将删除设备 "${row.name}"，若设备正被分配使用将解除关联，操作不可恢复。是否继续？`,
+    '删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
     try {
       await deleteDevice(row.id)
       ElMessage.success('删除成功')
       loadDevices()
     } catch (error) {
-      ElMessage.error('删除失败')
+      ElMessage.error(error.response?.data?.detail || '删除失败')
     }
   })
 }

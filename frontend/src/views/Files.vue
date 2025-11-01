@@ -637,11 +637,15 @@ const handleDownload = async (file) => {
 
 // 删除文件
 const handleDelete = (file) => {
-  ElMessageBox.confirm(`确定要删除文件 ${file.original_filename} 吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
+  ElMessageBox.confirm(
+    `此操作将删除文件 "${file.original_filename}"，并同时删除服务器上的物理文件，且不可恢复。是否继续？`,
+    '删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
     try {
       await fileApi.deleteFile(file.id)
       ElMessage.success('删除成功')
@@ -649,7 +653,8 @@ const handleDelete = (file) => {
       loadStats()
     } catch (error) {
       console.error('删除失败:', error)
-      ElMessage.error('删除失败')
+      const message = error.response?.data?.detail || '删除失败'
+      ElMessage.error(message)
     }
   }).catch(() => {
     // 用户取消删除
