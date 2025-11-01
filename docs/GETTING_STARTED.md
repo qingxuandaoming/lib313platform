@@ -93,6 +93,23 @@ npm run dev
 
 前端服务将运行在 <http://localhost:5173>
 
+### 4. 配置前端环境变量（网页端与桌面端通用）
+
+在前端根目录创建（或更新）环境文件，例如：
+
+```ini
+# .env.local（开发指向本地后端）
+VITE_API_BASE_URL=http://localhost:8000/api/v1
+
+# .env.production（生产指向服务器后端）
+VITE_API_BASE_URL=https://api.<your_domain>/api/v1
+
+# 桌面端建议使用哈希路由，避免 file:// 刷新异常
+VITE_ROUTER_MODE=hash
+```
+
+> 提示：`frontend/src/utils/request.js` 读取 `VITE_API_BASE_URL` 作为请求基础地址；`router/index.js` 可根据 `VITE_ROUTER_MODE` 切换 `createWebHistory` 或 `createWebHashHistory`。
+
 ## 四、验证安装
 
 1. 打开浏览器访问 <http://localhost:5173>
@@ -167,7 +184,20 @@ npm run dev
 
 > 前端令牌使用：在 `frontend/src/utils/request.js` 的请求拦截器中为需要认证的请求添加 `Authorization: Bearer <token>`。
 
-## 六、常见问题
+## 六、桌面端（Electron）快速说明
+
+- 目标：不迁移数据到本地，统一由服务器维护数据库与文件；Electron 仅作为前端壳接入远程 API。
+- 依赖：`electron`、`electron-builder`；打包生成 NSIS/MSI 安装包。
+- 步骤摘要：
+  1. `npm run build` 生成 `dist` 静态文件；
+  2. 在 `frontend/electron/main.js` 创建窗口并加载 `dist/index.html`；
+  3. 在 `package.json` 增加 `build` 字段配置安装器；
+  4. `npx electron-builder --win nsis` 生成安装包；
+  5. 启动前做 `GET https://api.<your_domain>/health` 健康检查，异常提示“服务器不可达”。
+
+> 完整计划见 `docs/windows_desktop_plan.md`；服务器部署建议与规格见 `docs/DEPLOYMENT.md`。
+
+## 七、常见问题
 
 ### 1. 数据库连接失败
 
@@ -186,7 +216,7 @@ npm run dev
 
 确保后端 `main.py` 中的 CORS 配置包含了前端地址
 
-## 七、生产部署
+## 八、生产部署
 
 ### 后端部署
 
@@ -203,7 +233,7 @@ npm run build
 # 将dist目录部署到静态服务器（Nginx等）
 ```
 
-## 八、下一步开发
+## 九、下一步开发
 
 当前已完成：
 
@@ -220,7 +250,7 @@ npm run build
 - [ ] 权限管理
 - [ ] 数据统计和可视化
 
-## 九、技术支持
+## 十、技术支持
 
 如有问题，请联系实验室管理员或查看：
 

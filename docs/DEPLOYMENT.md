@@ -249,6 +249,60 @@ docker-compose up -d
 
 ### 使用传统方式部署
 
+## 生产环境建议与服务器配置（≥50 并发，≥100GB 存储）
+
+为满足同时支持网页端与 Windows 桌面端的顺畅访问，并保证服务器集中维护数据与权限，建议按以下方案部署：
+
+### 推荐规格
+- 应用服务器：`8 vCPU / 16GB RAM / 256–512GB NVMe`，1Gbps 网卡。
+- 数据库服务器（可与应用分离）：`8 vCPU / 32GB RAM / ≥1TB NVMe`，独立 WAL 与数据卷。
+- 上传存储：本地卷或对象存储（MinIO/S3），容量起步 ≥500GB，按增长扩展。
+
+### 反向代理与 HTTPS
+- 使用 Nginx 终止 TLS，仅开放 `443`；反代到 `127.0.0.1:8000`。
+- 开启 `http2` 与 `gzip`，合理设置 `keepalive_timeout` 与上传超时。
+- 仅对内环回开放应用端口，外部均通过反代访问。
+
+### 应用进程模型
+- Linux：`gunicorn -w 6 -k uvicorn.workers.UvicornWorker backend.main:app --bind 127.0.0.1:8000`。
+- Windows Server：使用 `uvicorn --workers 6`，以服务方式常驻（NSSM/Task Scheduler）。
+
+### 数据库与连接池建议
+- PostgreSQL（示例 32GB 内存）：
+  - `shared_buffers`: `8GB`；`effective_cache_size`: `16–24GB`；`work_mem`: `32–64MB`。
+  - `max_connections`: `200`（结合应用侧连接池）。
+  - 开启 WAL 压缩与归档；定期 `VACUUM/ANALYZE`；为大表设计索引或分区。
+- 应用侧 SQLAlchemy 连接池：
+  - `pool_size=20`、`max_overflow=30`、`pool_pre_ping=True`、`pool_recycle=1800`。
+
+### 存储与备份策略
+- 数据库：每日全量备份（`pg_dump`），每小时 WAL 归档；保留 7–30 天并定期恢复演练。
+- 文件：每日快照或增量备份；与数据库备份保持一致性（必要时设置维护窗口）。
+- 日志：集中收集与轮转（保留 7–14 天）。
+
+### CORS 与客户端接入
+- 由于桌面端使用 Electron 渲染进程，`Origin` 可能为 `null`，建议在后端 `CORSMiddleware`：
+  - 使用明确白名单（网页端与桌面端域名）或 `allow_origin_regex` 精确匹配。
+  - 不使用跨域 Cookie，统一使用 `Authorization: Bearer <token>` 简化风险。
+
+### 环境变量（摘要）
+- 服务器后端：
+  - `DATABASE_URL=postgresql://<user>:<pass>@<db_host>:5432/lab313_platform`
+  - `UPLOAD_DIR=/var/lib/lib313platform/uploads`（Windows 可用 `D:\Lib313Platform\uploads`）
+  - `SECRET_KEY` 使用高强度随机值
+  - `FRONTEND_URL=https://desktop.<your_domain>`（参与 CORS）
+- 前端/桌面端：
+  - `VITE_API_BASE_URL=https://api.<your_domain>/api/v1`
+  - `VITE_ROUTER_MODE=hash`（桌面端建议哈希路由）
+
+### 可选增强
+- 引入缓存层（Redis）加速热点数据；
+- 将上传迁移至对象存储（MinIO/S3），后端返回签名 URL 下载；
+- 接入监控（Prometheus/Grafana）与日志平台（ELK/OpenSearch）。
+
+> 详细的 Windows 桌面端计划见 `docs/windows_desktop_plan.md`。
+
+
 #### 后端部署 (使用Gunicorn)
 
 ```bash
