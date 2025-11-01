@@ -252,17 +252,21 @@ const handleComplete = async () => {
 
 // 删除值日安排
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`确定要删除 ${formatDate(row.duty_date)} 的值日安排吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
+  ElMessageBox.confirm(
+    `此操作将删除 ${formatDate(row.duty_date)} 的值日安排，操作不可恢复。若成员被删除时，此记录亦会被级联删除。是否继续？`,
+    '删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
     try {
       await deleteDutySchedule(row.id)
       ElMessage.success('删除成功')
       loadDutySchedules()
     } catch (error) {
-      ElMessage.error('删除失败')
+      ElMessage.error(error.response?.data?.detail || '删除失败')
     }
   })
 }

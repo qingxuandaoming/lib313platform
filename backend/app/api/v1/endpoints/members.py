@@ -4,6 +4,11 @@ from sqlalchemy import func
 from typing import List, Optional
 from app.core.database import get_db
 from app.models.member import Member, MemberRole
+from app.models.project import Project, ProjectMember
+from app.models.session import Session
+from app.models.duty import DutySchedule
+from app.models.device import Device
+from app.models.file import File
 from app.schemas.member import MemberCreate, MemberUpdate, MemberResponse, MemberListResponse, MemberStats
 
 router = APIRouter()
@@ -125,7 +130,26 @@ def delete_member(member_id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="成员不存在"
         )
+    # 级联处理：解除/删除所有关联记录，避免外键约束
+    # 1) 项目负责人置空
+    db.query(Project).filter(Project.leader_id == member_id).update({Project.leader_id: None}, synchronize_session=False)
 
+    # 2) 分享会演讲人置空（保留分享会记录）
+    db.query(Session).filter(Session.speaker_id == member_id).update({Session.speaker_id: None}, synchronize_session=False)
+
+    # 3) 设备当前使用者置空
+    db.query(Device).filter(Device.current_user_id == member_id).update({Device.current_user_id: None}, synchronize_session=False)
+
+    # 4) 文件上传者置空（保留文件记录）
+    db.query(File).filter(File.uploader_id == member_id).update({File.uploader_id: None}, synchronize_session=False)
+
+    # 5) 删除项目成员关系
+    db.query(ProjectMember).filter(ProjectMember.member_id == member_id).delete(synchronize_session=False)
+
+    # 6) 删除值日安排
+    db.query(DutySchedule).filter(DutySchedule.member_id == member_id).delete(synchronize_session=False)
+
+    # 7) 删除成员本身
     db.delete(db_member)
     db.commit()
     return None

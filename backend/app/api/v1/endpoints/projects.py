@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.core.database import get_db
 from app.models.project import Project, ProjectMember, ProjectStatus
+from app.models.file import File
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, ProjectListResponse, ProjectStats
+import os
 
 router = APIRouter()
 
@@ -101,7 +103,21 @@ def delete_project(project_id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="项目不存在"
         )
+    # 级联删除：删除关联文件（包含物理文件）与项目成员关系
+    files = db.query(File).filter(File.project_id == project_id).all()
+    for f in files:
+        if f.file_path and os.path.exists(f.file_path):
+            try:
+                os.remove(f.file_path)
+            except Exception as e:
+                # 记录错误但不阻止数据库删除
+                print(f"删除文件失败: {e}")
+        db.delete(f)
 
+    # 删除项目成员关系
+    db.query(ProjectMember).filter(ProjectMember.project_id == project_id).delete(synchronize_session=False)
+
+    # 删除项目本身
     db.delete(db_project)
     db.commit()
     return None

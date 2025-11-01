@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional, List, Dict
 from datetime import datetime
 from app.models.project import ProjectStatus
@@ -19,6 +19,13 @@ class ProjectBase(BaseModel):
     github_url: Optional[str] = None
     demo_url: Optional[str] = None
     tags: Optional[str] = None
+
+    @field_validator("tags", mode="before")
+    def normalize_tags(cls, v):
+        # Accept list and convert to comma-separated string; pass through str/None
+        if isinstance(v, list):
+            return ",".join(str(x) for x in v)
+        return v
 
 
 class ProjectCreate(ProjectBase):
@@ -41,7 +48,7 @@ class ProjectUpdate(BaseModel):
 class ProjectResponse(ProjectBase):
     id: int
     cover_image: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
     class Config:

@@ -56,4 +56,7 @@ const router = createRouter({
   routes
 })
 
+// 兜底路由：将未知路径重定向到首页，避免外部脚本导航导致告警
+router.addRoute({ path: '/:pathMatch(.*)*', redirect: '/home' })
+
 export default router
