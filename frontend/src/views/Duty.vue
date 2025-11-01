@@ -157,7 +157,7 @@ const rules = {
 
 const dialogTitle = computed(() => isEdit.value ? '编辑值日安排' : '安排值日')
 
-// 加载值日安排
+// 加载值日安排（兼容标准返回 { data, total } 与数组返回）
 const loadDutySchedules = async () => {
   loading.value = true
   try {
@@ -166,22 +166,24 @@ const loadDutySchedules = async () => {
       params.start_date = dateRange.value[0]
       params.end_date = dateRange.value[1]
     }
-    const data = await getDutySchedules(params)
-    dutySchedules.value = data
+    const response = await getDutySchedules(params)
+    dutySchedules.value = Array.isArray(response) ? response : (response?.data ?? [])
   } catch (error) {
     ElMessage.error('加载值日安排失败')
+    dutySchedules.value = []
   } finally {
     loading.value = false
   }
 }
 
-// 加载成员列表
+// 加载成员列表（兼容标准返回 { data, total } 与数组返回）
 const loadMembers = async () => {
   try {
-    const data = await getMembers({ limit: 1000 })
-    members.value = data
+    const response = await getMembers({ limit: 1000 })
+    members.value = Array.isArray(response) ? response : (response?.data ?? [])
   } catch (error) {
     console.error('加载成员列表失败', error)
+    members.value = []
   }
 }
 
@@ -195,7 +197,12 @@ const showAddDialog = () => {
 // 显示编辑对话框
 const showEditDialog = (row) => {
   isEdit.value = true
-  Object.assign(form, row)
+  Object.assign(form, {
+    member_id: row.member_id ?? row.member?.id ?? null,
+    duty_date: row.duty_date ? new Date(row.duty_date) : null,
+    is_completed: !!row.is_completed,
+    completion_notes: row.completion_notes || ''
+  })
   dialogVisible.value = true
 }
 
@@ -217,22 +224,63 @@ const resetForm = () => {
   formRef.value?.clearValidate()
 }
 
+// 构建提交payload，格式化日期并移除空字符串字段
+const buildSchedulePayload = () => {
+  const payload = {
+    member_id: form.member_id,
+    duty_date: formatDateForApi(form.duty_date),
+    is_completed: !!form.is_completed
+  }
+  const notes = form.completion_notes
+  if (notes && notes.trim() !== '') {
+    payload.completion_notes = notes.trim()
+  }
+  return payload
+}
+
+// 将日期规范化为 YYYY-MM-DD 字符串
+const formatDateForApi = (val) => {
+  if (!val) return ''
+  if (typeof val === 'string') {
+    // 可能已是 YYYY-MM-DD
+    return val.length > 10 ? val.split('T')[0] : val
+  }
+  // Date 对象
+  try {
+    return new Date(val).toISOString().split('T')[0]
+  } catch {
+    return ''
+  }
+}
+
+// 统一错误信息提取，避免向 ElMessage 传入数组/对象导致渲染异常
+const getErrorMessage = (error) => {
+  const detail = error?.response?.data?.detail
+  if (!detail) return '操作失败'
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    return detail.map((d) => (d?.msg || d?.message || JSON.stringify(d))).join('；')
+  }
+  return typeof detail === 'object' ? JSON.stringify(detail) : String(detail)
+}
+
 // 提交表单
 const handleSubmit = async () => {
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
+        const payload = buildSchedulePayload()
         if (isEdit.value) {
-          await updateDutySchedule(form.id, form)
+          await updateDutySchedule(form.id, payload)
           ElMessage.success('更新成功')
         } else {
-          await createDutySchedule(form)
+          await createDutySchedule(payload)
           ElMessage.success('添加成功')
         }
         dialogVisible.value = false
         loadDutySchedules()
       } catch (error) {
-        ElMessage.error(error.response?.data?.detail || '操作失败')
+        ElMessage.error(getErrorMessage(error))
       }
     }
   })
@@ -241,12 +289,17 @@ const handleSubmit = async () => {
 // 处理完成
 const handleComplete = async () => {
   try {
-    await apiCompleteDuty(currentSchedule.value.id, completeForm.completion_notes)
+    const id = currentSchedule.value?.id
+    if (!id) {
+      ElMessage.error('当前记录无效，无法标记完成')
+      return
+    }
+    await apiCompleteDuty(id, completeForm.completion_notes)
     ElMessage.success('标记完成成功')
     completeDialogVisible.value = false
     loadDutySchedules()
   } catch (error) {
-    ElMessage.error('标记完成失败')
+    ElMessage.error(getErrorMessage(error))
   }
 }
 

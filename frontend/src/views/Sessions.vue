@@ -182,13 +182,14 @@ const loadSessions = async () => {
   }
 }
 
-// 加载成员列表
+// 加载成员列表（兼容标准返回 { data, total } 与数组返回）
 const loadMembers = async () => {
   try {
-    const data = await getMembers({ limit: 1000 })
-    members.value = data
+    const response = await getMembers({ limit: 1000 })
+    members.value = Array.isArray(response) ? response : (response?.data ?? [])
   } catch (error) {
     console.error('加载成员列表失败', error)
+    members.value = []
   }
 }
 
